@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"myapp/app"
 	"myapp/config"
+	"myapp/handler/middlewares"
 	"myapp/helpers"
 	"myapp/repository"
 	"myapp/routes"
@@ -29,7 +30,7 @@ func main() {
 	e := echo.New()
 	routes.ApiRoutes(e, handler)
 
-	e.Use(middleware.Logger())
+	middlewares.SetupCustomLogger(e)
 	e.Use(middleware.Recover())
 	e.Use(middleware.Secure())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{

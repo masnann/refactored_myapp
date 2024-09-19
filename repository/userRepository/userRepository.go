@@ -1,8 +1,6 @@
 package userrepository
 
 import (
-	"database/sql"
-	"errors"
 	"log"
 	"myapp/helpers"
 	"myapp/models"
@@ -32,11 +30,8 @@ func (r UserRepository) FindUserByID(id int64) (models.UserModels, error) {
 	row := r.repo.DB.QueryRow(query, id)
 	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Status, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return user, errors.New("user not found")
-		}
-		log.Println("Error scanning row: ", err)
-		return user, errors.New("error scanning row")
+		log.Println("Error query FindUserByID: ", err)
+		return user, err
 	}
 	return user, nil
 }

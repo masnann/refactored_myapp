@@ -20,6 +20,7 @@ var (
 	MONGOHost string
 	MONGOPort string
 	MONGODB   string
+	TestDBURL string
 )
 
 func init() {
@@ -36,6 +37,7 @@ func init() {
 	MONGOHost = GetEnv("MONGO_HOST")
 	MONGOPort = GetEnv("MONGO_PORT")
 	MONGODB = GetEnv("MONGO_DB")
+	TestDBURL = GetEnv("TEST_DB_URL")
 }
 
 func loadEnv() {

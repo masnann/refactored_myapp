@@ -1,0 +1,810 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>app: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">myapp/app/app.go (100.0%)</option>
+				
+				<option value="file1">myapp/config/config.go (84.6%)</option>
+				
+				<option value="file2">myapp/config/postgres.go (0.0%)</option>
+				
+				<option value="file3">myapp/handler/handler.go (100.0%)</option>
+				
+				<option value="file4">myapp/handler/middlewares/log.go (0.0%)</option>
+				
+				<option value="file5">myapp/handler/userHandler/userHandler.go (61.5%)</option>
+				
+				<option value="file6">myapp/helpers/function.go (17.9%)</option>
+				
+				<option value="file7">myapp/main.go (0.0%)</option>
+				
+				<option value="file8">myapp/repository/repository.go (100.0%)</option>
+				
+				<option value="file9">myapp/repository/userRepository/userRepository.go (80.0%)</option>
+				
+				<option value="file10">myapp/routes/api.go (100.0%)</option>
+				
+				<option value="file11">myapp/service/service.go (100.0%)</option>
+				
+				<option value="file12">myapp/service/userService/userService.go (66.7%)</option>
+				
+				<option value="file13">myapp/test/setupTest.go (73.5%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package app
+
+import (
+        "myapp/handler"
+        "myapp/repository"
+        userrepository "myapp/repository/userRepository"
+        "myapp/service"
+        userservice "myapp/service/userService"
+)
+
+func SetupApp(repo repository.Repository) handler.Handler <span class="cov8" title="1">{
+
+        userRepo := userrepository.NewUserRepository(repo)
+
+        service := service.NewService(userRepo)
+
+        userService := userservice.NewUserService(service)
+
+        handler := handler.NewHandler(userService)
+
+        return handler
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package config
+
+import (
+        "log"
+        "os"
+        "path/filepath"
+
+        "github.com/joho/godotenv"
+)
+
+var (
+        DBDriver  string
+        DBName    string
+        DBHost    string
+        DBPort    string
+        DBUser    string
+        DBPass    string
+        SSLMode   string
+        JWTSecret string
+        MONGOHost string
+        MONGOPort string
+        MONGODB   string
+        TestDBURL string
+)
+
+func init() <span class="cov8" title="1">{
+        loadEnv()
+
+        DBDriver = GetEnv("DB_DRIVER")
+        DBName = GetEnv("DB_NAME")
+        DBHost = GetEnv("DB_HOST")
+        DBPort = GetEnv("DB_PORT")
+        DBUser = GetEnv("DB_USER")
+        DBPass = GetEnv("DB_PASS")
+        SSLMode = GetEnv("SSL_MODE")
+        JWTSecret = GetEnv("JWT_SECRET")
+        MONGOHost = GetEnv("MONGO_HOST")
+        MONGOPort = GetEnv("MONGO_PORT")
+        MONGODB = GetEnv("MONGO_DB")
+        TestDBURL = GetEnv("TEST_DB_URL")
+}</span>
+
+func loadEnv() <span class="cov8" title="1">{
+        possiblePaths := []string{
+                ".env",
+                filepath.Join("..", ".env"),
+                filepath.Join("../..", ".env"),
+        }
+
+        var err error
+        for _, path := range possiblePaths </span><span class="cov8" title="1">{
+                err = godotenv.Load(path)
+                if err == nil </span><span class="cov8" title="1">{
+                        log.Printf("Loaded .env file from %s", path)
+                        return
+                }</span>
+        }
+
+        <span class="cov0" title="0">log.Printf("Error loading .env file: %v", err)</span>
+}
+
+func GetEnv(key string, value ...string) string <span class="cov8" title="1">{
+        if envValue := os.Getenv(key); envValue != "" </span><span class="cov8" title="1">{
+                return envValue
+        }</span>
+        <span class="cov0" title="0">if len(value) &gt; 0 </span><span class="cov0" title="0">{
+                return value[0]
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package config
+
+import (
+        "database/sql"
+        "errors"
+        "fmt"
+
+        _ "github.com/lib/pq"
+)
+
+var db *sql.DB
+
+// OpenConnection membuka koneksi ke database
+func OpenConnection() error <span class="cov0" title="0">{
+        var err error
+        db, err = setupConnection()
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        // Cek koneksi
+        <span class="cov0" title="0">err = db.Ping()
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// setupConnection menyiapkan koneksi ke database
+func setupConnection() (*sql.DB, error) <span class="cov0" title="0">{
+        var connection = fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=%s",
+                DBUser, DBPass, DBName, DBHost, DBPort, SSLMode)
+        fmt.Println("Connection Info:", DBDriver, connection)
+
+        db, err := sql.Open(DBDriver, connection)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, errors.New("failed to create the database connection")
+        }</span>
+
+        <span class="cov0" title="0">return db, nil</span>
+}
+
+// CloseConnectionDB menutup koneksi ke database
+func CloseConnectionDB() <span class="cov0" title="0">{
+        if db != nil </span><span class="cov0" title="0">{
+                db.Close()
+        }</span>
+}
+
+// DBConnection mengembalikan koneksi database
+func DBConnection() *sql.DB <span class="cov0" title="0">{
+        return db
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package handler
+
+import "myapp/service"
+
+type Handler struct {
+        UserService service.UserServiceInterface
+}
+
+func NewHandler(
+        userService service.UserServiceInterface,
+) Handler <span class="cov8" title="1">{
+        return Handler{
+                UserService: userService,
+        }
+}</span>
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package middlewares
+
+import (
+        "github.com/labstack/echo/v4"
+        "github.com/labstack/echo/v4/middleware"
+)
+
+func SetupCustomLogger(e *echo.Echo) <span class="cov0" title="0">{
+        e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+                Format:           `${time_custom} Status=${status}, method=${method}, uri=${uri}, user_agent="${user_agent}"` + "\n",
+                CustomTimeFormat: "2006/01/02 15:04:05",
+        }))
+}</span>
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package userhandler
+
+import (
+        "log"
+        "myapp/constants"
+        "myapp/handler"
+        "myapp/helpers"
+        "myapp/models"
+        "net/http"
+
+        "github.com/labstack/echo/v4"
+)
+
+type UserHandler struct {
+        handler handler.Handler
+}
+
+func NewUserHandler(handler handler.Handler) UserHandler <span class="cov8" title="1">{
+        return UserHandler{
+                handler: handler,
+        }
+}</span>
+
+func (h UserHandler) FindUserByID(ctx echo.Context) error <span class="cov8" title="1">{
+        var result models.Response
+
+        req := new(models.RequestID)
+        if err := helpers.ValidateStruct(ctx, req); err != nil </span><span class="cov0" title="0">{
+                log.Printf("Error Failed to validate request: %v", err)
+                result = helpers.ResponseJSON(false, constants.VALIDATION_ERROR_CODE, err.Error(), nil)
+                return ctx.JSON(http.StatusBadRequest, result)
+        }</span>
+
+        <span class="cov8" title="1">user, err := h.handler.UserService.FindUserByID(*req)
+        if err != nil </span><span class="cov0" title="0">{
+                result = helpers.ResponseJSON(false, constants.INTERNAL_SERVER_ERROR, err.Error(), nil)
+                return ctx.JSON(http.StatusInternalServerError, result)
+        }</span>
+
+        <span class="cov8" title="1">result = helpers.ResponseJSON(true, constants.SUCCESS_CODE, constants.EMPTY_VALUE, user)
+        return ctx.JSON(http.StatusOK, result)</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package helpers
+
+import (
+        "crypto"
+        "crypto/rand"
+        "crypto/rsa"
+        "crypto/sha256"
+        "crypto/x509"
+        "encoding/base64"
+        "encoding/pem"
+        "errors"
+        "fmt"
+        "myapp/models"
+        "regexp"
+        "strconv"
+        "strings"
+        "time"
+
+        "github.com/go-playground/validator"
+        "github.com/labstack/echo/v4"
+)
+
+func ResponseJSON(success bool, code, message string, result interface{}) models.Response <span class="cov8" title="1">{
+        response := models.Response{
+                StatusCode:       code,
+                Success:          success,
+                Message:          message,
+                ResponseDateTime: time.Now(),
+                Result:           result,
+        }
+
+        return response
+}</span>
+
+func TimeStampNow() string <span class="cov0" title="0">{
+        return time.Now().Format("2006-01-02 15:04:05")
+}</span>
+
+func ReplaceSQL(old, searchPattern string) string <span class="cov8" title="1">{
+        tmpCount := strings.Count(old, searchPattern)
+        for m := 1; m &lt;= tmpCount; m++ </span><span class="cov8" title="1">{
+                old = strings.Replace(old, searchPattern, "$"+strconv.Itoa(m), 1)
+        }</span>
+        <span class="cov8" title="1">return old</span>
+}
+
+func IsValidDate(date string) bool <span class="cov0" title="0">{
+        _, err := time.Parse("2006-01-02", date)
+        return err == nil
+}</span>
+
+func IsDateRangeValid(dateStart, dateEnd string) bool <span class="cov0" title="0">{
+        start, _ := time.Parse("2006-01-02", dateStart)
+        end, _ := time.Parse("2006-01-02", dateEnd)
+        return !end.Before(start)
+}</span>
+
+var validate *validator.Validate
+
+func init() <span class="cov8" title="1">{
+        validate = validator.New()
+        validate.RegisterValidation("noSpace", func(fl validator.FieldLevel) bool </span><span class="cov0" title="0">{
+                password := fl.Field().String()
+                return !regexp.MustCompile(`\s`).MatchString(password)
+        }</span>)
+}
+
+func ValidateStruct(ctx echo.Context, s interface{}) error <span class="cov8" title="1">{
+        // Bind the request body to the struct
+        if err := ctx.Bind(s); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("Invalid request body")
+        }</span>
+
+        // Validate the struct
+        <span class="cov8" title="1">err := validate.Struct(s)
+        if err != nil </span><span class="cov0" title="0">{
+                var customErrors []string
+
+                for _, err := range err.(validator.ValidationErrors) </span><span class="cov0" title="0">{
+                        switch err.Tag() </span>{
+                        case "required":<span class="cov0" title="0">
+                                customErrors = append(customErrors, fmt.Sprintf("Field '%s' is required", err.Field()))</span>
+                        case "min":<span class="cov0" title="0">
+                                customErrors = append(customErrors, fmt.Sprintf("Field '%s' must be at least %s characters long", err.Field(), err.Param()))</span>
+                        case "email":<span class="cov0" title="0">
+                                customErrors = append(customErrors, fmt.Sprintf("Field '%s' must be a valid email address", err.Field()))</span>
+                        case "noSpace":<span class="cov0" title="0">
+                                customErrors = append(customErrors, fmt.Sprintf("Field '%s' cannot contain spaces", err.Field()))</span>
+                        case "alphanum":<span class="cov0" title="0">
+                                customErrors = append(customErrors, fmt.Sprintf("Field '%s' must be alphanumeric", err.Field()))</span>
+                        case "max":<span class="cov0" title="0">
+                                customErrors = append(customErrors, fmt.Sprintf("Field '%s' cannot be longer than %s characters", err.Field(), err.Param()))</span>
+                        default:<span class="cov0" title="0">
+                                customErrors = append(customErrors, fmt.Sprintf("Field '%s' validation failed with tag '%s'", err.Field(), err.Tag()))</span>
+                        }
+                }
+
+                <span class="cov0" title="0">return fmt.Errorf("Validation error: %s", strings.Join(customErrors, "; "))</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+func ContainsStringInSlice(slice []string, str string) bool <span class="cov0" title="0">{
+        for _, item := range slice </span><span class="cov0" title="0">{
+                if item == str </span><span class="cov0" title="0">{
+                        return true
+                }</span>
+        }
+        <span class="cov0" title="0">return false</span>
+}
+
+func GetCurrentUser(ctx echo.Context) (models.CurrentUserModels, error) <span class="cov0" title="0">{
+        currentUser, ok := ctx.Get("user").(models.CurrentUserModels)
+        if !ok </span><span class="cov0" title="0">{
+                return currentUser, errors.New("failed to get user from context")
+        }</span>
+
+        <span class="cov0" title="0">return currentUser, nil</span>
+}
+
+func AsymetricSignature(input, key string) string <span class="cov0" title="0">{
+
+        var rawkey []byte
+
+        fmt.Println("STRING KEY : ", key)
+
+        privPem, errs := pem.Decode([]byte(key))
+        if privPem == nil </span><span class="cov0" title="0">{
+                fmt.Println(string(errs))
+                fmt.Println(privPem)
+                return "error"
+        }</span>
+
+        <span class="cov0" title="0">if privPem.Type != "PRIVATE KEY" </span><span class="cov0" title="0">{
+                fmt.Printf("RSA private key is of the wrong type :%s\n", privPem.Type)
+        }</span>
+
+        <span class="cov0" title="0">key_for_sign, err := parsePrivateKey(privPem.Bytes)
+
+        // key_for_sign, err := parsePrivateKey([]byte(key))
+
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("ERROR PARSING RSA KEY : ", err.Error())
+
+                return ""
+        }</span>
+
+        <span class="cov0" title="0">h := sha256.New()
+        h.Write([]byte(input))
+        d := h.Sum(nil)
+
+        fmt.Println("request raw", input)
+        fmt.Println("request hashed : ", d)
+
+        rawkey, err = rsa.SignPKCS1v15(rand.Reader, key_for_sign, crypto.SHA256, d)
+
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("ERROR ENCRYPT SIGNATURE : ", err.Error())
+                return ""
+        }</span>
+        <span class="cov0" title="0">base64key := base64.StdEncoding.EncodeToString(rawkey)
+
+        return base64key</span>
+}
+
+func parsePrivateKey(pemBytes []byte) (*rsa.PrivateKey, error) <span class="cov0" title="0">{
+        privatekey, err := x509.ParsePKCS8PrivateKey(pemBytes)
+
+        privatekeyrsa, _ := privatekey.(*rsa.PrivateKey)
+
+        return privatekeyrsa, err
+}</span>
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package main
+
+import (
+        "fmt"
+        "myapp/app"
+        "myapp/config"
+        "myapp/handler/middlewares"
+        "myapp/helpers"
+        "myapp/repository"
+        "myapp/routes"
+        "net/http"
+        "strconv"
+
+        "github.com/labstack/echo/v4"
+        "github.com/labstack/echo/v4/middleware"
+)
+
+func main() <span class="cov0" title="0">{
+        if err := config.OpenConnection(); err != nil </span><span class="cov0" title="0">{
+                panic(fmt.Sprintf("Open Connection Failed: %s", err.Error()))</span>
+        }
+        <span class="cov0" title="0">defer config.CloseConnectionDB()
+
+        DB := config.DBConnection()
+
+        //Initialize repository and service
+        repo := repository.NewRepository(DB)
+        handler := app.SetupApp(repo)
+
+        e := echo.New()
+        routes.ApiRoutes(e, handler)
+
+        middlewares.SetupCustomLogger(e)
+        e.Use(middleware.Recover())
+        e.Use(middleware.Secure())
+        e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+                AllowCredentials: true,
+                AllowOrigins:     []string{"*"},
+                AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
+        }))
+
+        e.HTTPErrorHandler = func(err error, c echo.Context) </span><span class="cov0" title="0">{
+                report, ok := err.(*echo.HTTPError)
+                if !ok </span><span class="cov0" title="0">{
+                        report = echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+                }</span>
+                <span class="cov0" title="0">result := helpers.ResponseJSON(false, strconv.Itoa(report.Code), err.Error(), nil)
+                c.Logger().Error(report)
+                c.JSON(report.Code, result)</span>
+        }
+
+        <span class="cov0" title="0">e.GET("/", func(c echo.Context) error </span><span class="cov0" title="0">{
+                return c.String(http.StatusOK, "Hello, GO AUTH !")
+        }</span>)
+        // Start server
+        <span class="cov0" title="0">port := fmt.Sprintf(":%s", config.GetEnv("APP_PORT", "8080"))
+
+        e.Logger.Fatal(e.Start(port))</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package repository
+
+import (
+        "database/sql"
+)
+
+type Repository struct {
+        DB *sql.DB
+}
+
+func NewRepository(db *sql.DB) Repository <span class="cov8" title="1">{
+        return Repository{
+                DB: db,
+        }
+}</span>
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package userrepository
+
+import (
+        "log"
+        "myapp/helpers"
+        "myapp/models"
+        "myapp/repository"
+)
+
+type UserRepository struct {
+        repo repository.Repository
+}
+
+func NewUserRepository(repo repository.Repository) UserRepository <span class="cov8" title="1">{
+        return UserRepository{
+                repo: repo,
+        }
+}</span>
+
+func (r UserRepository) FindUserByID(id int64) (models.UserModels, error) <span class="cov8" title="1">{
+        var user models.UserModels
+        query := `
+                SELECT 
+                        id, username, email, password, status, created_at, updated_at
+                FROM 
+                        users WHERE id = ? AND status = 'active'`
+
+        query = helpers.ReplaceSQL(query, "?")
+
+        row := r.repo.DB.QueryRow(query, id)
+        err := row.Scan(&amp;user.ID, &amp;user.Username, &amp;user.Email, &amp;user.Password, &amp;user.Status, &amp;user.CreatedAt, &amp;user.UpdatedAt)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Println("Error query FindUserByID: ", err)
+                return user, err
+        }</span>
+        <span class="cov8" title="1">return user, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package routes
+
+import (
+        "myapp/handler"
+        userhandler "myapp/handler/userHandler"
+
+        "github.com/labstack/echo/v4"
+)
+
+func ApiRoutes(e *echo.Echo, handler handler.Handler) <span class="cov8" title="1">{
+
+        public := e.Group("/api/v1/public")
+        userHandler := userhandler.NewUserHandler(handler)
+
+        userGroup := public.Group("/user")
+        userGroup.POST("/findbyid", userHandler.FindUserByID)
+}</span>
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package service
+
+import "myapp/repository"
+
+type Service struct {
+        UserRepo repository.UserRepositoryInterface
+}
+
+func NewService(
+        userRepo repository.UserRepositoryInterface,
+) Service <span class="cov8" title="1">{
+        return Service{
+                UserRepo: userRepo,
+        }
+}</span>
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">package userservice
+
+import (
+        "errors"
+        "myapp/models"
+        "myapp/service"
+)
+
+type UserService struct {
+        service service.Service
+}
+
+func NewUserService(service service.Service) UserService <span class="cov8" title="1">{
+        return UserService{
+                service: service,
+        }
+}</span>
+
+func (s UserService) FindUserByID(req models.RequestID) (models.UserModels, error) <span class="cov8" title="1">{
+        result, err := s.service.UserRepo.FindUserByID(req.ID)
+        if err != nil </span><span class="cov0" title="0">{
+                msg := "user not found"
+                return result, errors.New(msg)
+        }</span>
+        <span class="cov8" title="1">return result, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package test
+
+import (
+        "database/sql"
+        "fmt"
+        "path/filepath"
+        "testing"
+
+        "myapp/app"
+        "myapp/config"
+        "myapp/repository"
+        "myapp/routes"
+
+        "github.com/labstack/echo/v4"
+        _ "github.com/lib/pq"
+        "github.com/pressly/goose"
+)
+
+var testDB *sql.DB
+
+// OpenConnectionDBTest initializes the test database connection, runs migrations, and ensures that the schema is set up.
+func OpenConnectionDBTest() error <span class="cov8" title="1">{
+        var err error
+
+        // Open a connection to the test database
+        testDB, err = sql.Open("postgres", config.TestDBURL)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to connect to test database: %w", err)
+        }</span>
+
+        // Ping the database to ensure the connection is established
+        <span class="cov8" title="1">if err := testDB.Ping(); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to ping test database: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">if err := cleanupDatabase(testDB); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to clean up test database: %w", err)
+        }</span>
+
+        // Run database migrations to ensure schema is up to date
+        <span class="cov8" title="1">if err := runMigrations(testDB); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to run migrations: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// runMigrations applies all pending migrations to the database.
+func runMigrations(db *sql.DB) error <span class="cov8" title="1">{
+        migrationDir := filepath.Join("..", "..", "db", "migrations")
+
+        if err := goose.SetDialect("postgres"); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to set dialect: %w", err)
+        }</span>
+        <span class="cov8" title="1">if err := goose.Up(db, migrationDir); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to run migrations: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func cleanupDatabase(db *sql.DB) error <span class="cov8" title="1">{
+        _, err := db.Exec("DROP TABLE IF EXISTS users;")
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to clean up table users: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">_, err = db.Exec("DROP TABLE IF EXISTS goose_db_version;")
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to clean up table goose_db_version: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// GetTestDB returns the test database connection.
+func GetTestDB() *sql.DB <span class="cov8" title="1">{
+        return testDB
+}</span>
+
+// SetupEcho sets up the Echo instance for testing.
+func SetupEcho(db *sql.DB) *echo.Echo <span class="cov8" title="1">{
+        e := echo.New()
+        repo := repository.NewRepository(db)
+        handler := app.SetupApp(repo)
+        routes.ApiRoutes(e, handler)
+        return e
+}</span>
+
+func InitializeTestDB(t *testing.T) *sql.DB <span class="cov8" title="1">{
+        if err := OpenConnectionDBTest(); err != nil </span><span class="cov0" title="0">{
+                t.Fatalf("Failed to open test database connection: %v", err)
+        }</span>
+
+        <span class="cov8" title="1">db := GetTestDB()
+
+        return db</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
