@@ -35,3 +35,20 @@ func (r UserRepository) FindUserByID(id int64) (models.UserModels, error) {
 	}
 	return user, nil
 }
+
+func (r UserRepository) Register(req models.UserModels) (int64, error) {
+	var ID int64
+	query := `
+		INSERT INTO users (username, email, password, status, created_at, updated_at) 
+		VALUES (?, ?, ?, ?, ?, ?)
+		RETURNING id`
+
+	query = helpers.ReplaceSQL(query, "?")
+	err := r.repo.DB.QueryRow(query, req.Username, req.Email, req.Password, req.Status, req.CreatedAt, req.UpdatedAt).Scan(&ID)
+	if err != nil {
+		log.Println("Error querying register: ", err)
+		return ID, err
+	}
+
+	return ID, nil
+}

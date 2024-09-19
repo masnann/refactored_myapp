@@ -14,4 +14,5 @@ func ApiRoutes(e *echo.Echo, handler handler.Handler) {
 
 	userGroup := public.Group("/user")
 	userGroup.POST("/findbyid", userHandler.FindUserByID)
+	userGroup.POST("/register", userHandler.Register)
 }

@@ -1,8 +1,11 @@
 package test
 
 import (
+	"bytes"
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"net/http/httptest"
 	"path/filepath"
 	"testing"
 
@@ -87,6 +90,8 @@ func SetupEcho(db *sql.DB) *echo.Echo {
 	return e
 }
 
+
+
 func InitializeTestDB(t *testing.T) *sql.DB {
 	if err := OpenConnectionDBTest(); err != nil {
 		t.Fatalf("Failed to open test database connection: %v", err)
@@ -95,4 +100,28 @@ func InitializeTestDB(t *testing.T) *sql.DB {
 	db := GetTestDB()
 
 	return db
+}
+
+// General helper function to send HTTP requests and return the response
+func SendAPIRequest(t *testing.T, e *echo.Echo, method, path string, payload interface{}) *httptest.ResponseRecorder {
+	var reqBodyBytes []byte
+	var err error
+
+	// If a payload is provided, marshal it into JSON
+	if payload != nil {
+		reqBodyBytes, err = json.Marshal(payload)
+		if err != nil {
+			t.Fatalf("Failed to marshal request body: %v", err)
+		}
+	}
+
+	// Create the HTTP request with the provided method, path, and payload
+	req := httptest.NewRequest(method, path, bytes.NewReader(reqBodyBytes))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
+	// Record the response
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	return rec
 }

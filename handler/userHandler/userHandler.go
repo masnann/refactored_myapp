@@ -27,7 +27,7 @@ func (h UserHandler) FindUserByID(ctx echo.Context) error {
 	req := new(models.RequestID)
 	if err := helpers.ValidateStruct(ctx, req); err != nil {
 		log.Printf("Error Failed to validate request: %v", err)
-		result = helpers.ResponseJSON(false, constants.VALIDATION_ERROR_CODE, err.Error(), nil)
+		result = helpers.ResponseJSON(false, constants.BAD_REQUEST_CODE, err.Error(), nil)
 		return ctx.JSON(http.StatusBadRequest, result)
 	}
 
@@ -39,4 +39,23 @@ func (h UserHandler) FindUserByID(ctx echo.Context) error {
 
 	result = helpers.ResponseJSON(true, constants.SUCCESS_CODE, constants.EMPTY_VALUE, user)
 	return ctx.JSON(http.StatusOK, result)
+}
+
+func (h UserHandler) Register(ctx echo.Context) error {
+	var result models.Response
+
+	req := new(models.UserRegisterRequest)
+	if err := helpers.ValidateStruct(ctx, req); err != nil {
+		log.Printf("Error Failed to validate request: %v", err)
+		result = helpers.ResponseJSON(false, constants.BAD_REQUEST_CODE, err.Error(), nil)
+		return ctx.JSON(http.StatusBadRequest, result)
+	}
+	userID, err := h.handler.UserService.Register(*req)
+	if err != nil {
+		result = helpers.ResponseJSON(false, constants.INTERNAL_SERVER_ERROR, err.Error(), nil)
+		return ctx.JSON(http.StatusInternalServerError, result)
+	}
+	result = helpers.ResponseJSON(true, constants.SUCCESS_CODE, constants.EMPTY_VALUE, userID)
+	return ctx.JSON(http.StatusCreated, result)
+
 }

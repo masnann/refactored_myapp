@@ -2,6 +2,7 @@ package app
 
 import (
 	"myapp/handler"
+	"myapp/helpers/utils"
 	"myapp/repository"
 	userrepository "myapp/repository/userRepository"
 	"myapp/service"
@@ -11,8 +12,9 @@ import (
 func SetupApp(repo repository.Repository) handler.Handler {
 
 	userRepo := userrepository.NewUserRepository(repo)
+	utils := utils.NewUtilsService(repo)
 
-	service := service.NewService(userRepo)
+	service := service.NewService(userRepo, utils)
 
 	userService := userservice.NewUserService(service)
 
