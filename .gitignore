@@ -1,1 +1,9 @@
 *.env
+
+# Coverage files
+coverage.html
+coverage.out
+coverage_service.html
+coverage_service.out
+coverage_repository.html
+coverage_repository.out

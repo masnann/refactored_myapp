@@ -1,21 +1,13 @@
-package test
+package setup
 
 import (
-	"bytes"
 	"database/sql"
-	"encoding/json"
 	"fmt"
-	"net/http/httptest"
+	"myapp/config"
 	"path/filepath"
 	"testing"
 
-	"myapp/app"
-	"myapp/config"
-	"myapp/repository"
-	"myapp/routes"
-
-	"github.com/labstack/echo/v4"
-	_ "github.com/lib/pq"
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/pressly/goose"
 )
 
@@ -62,6 +54,7 @@ func runMigrations(db *sql.DB) error {
 	return nil
 }
 
+// delete table
 func cleanupDatabase(db *sql.DB) error {
 	_, err := db.Exec("DROP TABLE IF EXISTS users;")
 	if err != nil {
@@ -81,17 +74,7 @@ func GetTestDB() *sql.DB {
 	return testDB
 }
 
-// SetupEcho sets up the Echo instance for testing.
-func SetupEcho(db *sql.DB) *echo.Echo {
-	e := echo.New()
-	repo := repository.NewRepository(db)
-	handler := app.SetupApp(repo)
-	routes.ApiRoutes(e, handler)
-	return e
-}
-
-
-
+// Function to initialize database connection
 func InitializeTestDB(t *testing.T) *sql.DB {
 	if err := OpenConnectionDBTest(); err != nil {
 		t.Fatalf("Failed to open test database connection: %v", err)
@@ -102,26 +85,12 @@ func InitializeTestDB(t *testing.T) *sql.DB {
 	return db
 }
 
-// General helper function to send HTTP requests and return the response
-func SendAPIRequest(t *testing.T, e *echo.Echo, method, path string, payload interface{}) *httptest.ResponseRecorder {
-	var reqBodyBytes []byte
-	var err error
-
-	// If a payload is provided, marshal it into JSON
-	if payload != nil {
-		reqBodyBytes, err = json.Marshal(payload)
-		if err != nil {
-			t.Fatalf("Failed to marshal request body: %v", err)
-		}
+// OpenConnectionSQLMock creates a mock database connection for testing purposes.
+func OpenConnectionSQLMock(t *testing.T) (*sql.DB, sqlmock.Sqlmock) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatal("Error creating mock database:", err)
 	}
 
-	// Create the HTTP request with the provided method, path, and payload
-	req := httptest.NewRequest(method, path, bytes.NewReader(reqBodyBytes))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-
-	// Record the response
-	rec := httptest.NewRecorder()
-	e.ServeHTTP(rec, req)
-
-	return rec
+	return db, mock
 }

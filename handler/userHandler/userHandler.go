@@ -57,5 +57,24 @@ func (h UserHandler) Register(ctx echo.Context) error {
 	}
 	result = helpers.ResponseJSON(true, constants.SUCCESS_CODE, constants.EMPTY_VALUE, userID)
 	return ctx.JSON(http.StatusCreated, result)
+}
 
+func (h UserHandler) DeleteUser(ctx echo.Context) error {
+	var result models.Response
+
+	req := new(models.RequestID)
+	if err := helpers.ValidateStruct(ctx, req); err != nil {
+		log.Printf("Error Failed to validate request: %v", err)
+		result = helpers.ResponseJSON(false, constants.BAD_REQUEST_CODE, err.Error(), nil)
+		return ctx.JSON(http.StatusBadRequest, result)
+	}
+
+	userID, err := h.handler.UserService.DeleteUser(*req)
+	if err != nil {
+		result = helpers.ResponseJSON(false, constants.INTERNAL_SERVER_ERROR, err.Error(), nil)
+		return ctx.JSON(http.StatusInternalServerError, result)
+	}
+
+	result = helpers.ResponseJSON(true, constants.SUCCESS_CODE, constants.EMPTY_VALUE, userID)
+	return ctx.JSON(http.StatusOK, result)
 }

@@ -52,3 +52,16 @@ func (r UserRepository) Register(req models.UserModels) (int64, error) {
 
 	return ID, nil
 }
+
+func (r UserRepository) DeleteUser(userID int64) (int64, error) {
+	var updatedID int64
+	query := `UPDATE users SET status = 'inactive' WHERE id =? RETURNING id`
+	query = helpers.ReplaceSQL(query, "?")
+	err := r.repo.DB.QueryRow(query, userID).Scan(&updatedID)
+	if err != nil {
+		log.Println("Error querying register: ", err)
+		return userID, err
+	}
+
+	return userID, nil
+}
