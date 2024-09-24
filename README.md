@@ -65,6 +65,12 @@ go tool cover -html=coverage_service.out -o coverage_service.html
 
 ### Running Integration Test Service
 ```bash
-go test ./test/integrations/... -coverpkg=./handler/...,./service/...,./repository/... -coverprofile=coverage.out
+go test ./test/integrations/... -coverpkg=./handler/...,./service/...,./repository/... -coverprofile=coverage_integrations.out
+go tool cover -html=coverage_integrations.out -o coverage_integrations.html
+```
+
+### Running All Tests
+```bash
+go test ./... -coverpkg=./handler/...,./service/...,./repository/... -coverprofile=coverage.out
 go tool cover -html=coverage.out -o coverage.html
 ```

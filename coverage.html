@@ -57,15 +57,17 @@
 				
 				<option value="file0">myapp/handler/handler.go (100.0%)</option>
 				
-				<option value="file1">myapp/handler/userHandler/userHandler.go (100.0%)</option>
+				<option value="file1">myapp/handler/middlewares/log.go (0.0%)</option>
 				
-				<option value="file2">myapp/repository/repository.go (100.0%)</option>
+				<option value="file2">myapp/handler/userHandler/userHandler.go (100.0%)</option>
 				
-				<option value="file3">myapp/repository/userRepository/userRepository.go (92.3%)</option>
+				<option value="file3">myapp/repository/repository.go (100.0%)</option>
 				
-				<option value="file4">myapp/service/service.go (100.0%)</option>
+				<option value="file4">myapp/repository/userRepository/userRepository.go (100.0%)</option>
 				
-				<option value="file5">myapp/service/userService/userService.go (84.0%)</option>
+				<option value="file5">myapp/service/service.go (100.0%)</option>
+				
+				<option value="file6">myapp/service/userService/userService.go (100.0%)</option>
 				
 				</select>
 			</div>
@@ -96,7 +98,22 @@ func NewHandler(
 }</span>
 </pre>
 		
-		<pre class="file" id="file1" style="display: none">package userhandler
+		<pre class="file" id="file1" style="display: none">package middlewares
+
+import (
+        "github.com/labstack/echo/v4"
+        "github.com/labstack/echo/v4/middleware"
+)
+
+func SetupCustomLogger(e *echo.Echo) <span class="cov0" title="0">{
+        e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+                Format:           `${time_custom} Status=${status}, method=${method}, uri=${uri}, user_agent="${user_agent}"` + "\n",
+                CustomTimeFormat: "2006/01/02 15:04:05",
+        }))
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package userhandler
 
 import (
         "log"
@@ -178,7 +195,7 @@ func (h UserHandler) DeleteUser(ctx echo.Context) error <span class="cov8" title
 }
 </pre>
 		
-		<pre class="file" id="file2" style="display: none">package repository
+		<pre class="file" id="file3" style="display: none">package repository
 
 import (
         "database/sql"
@@ -195,7 +212,7 @@ func NewRepository(db *sql.DB) Repository <span class="cov8" title="1">{
 }</span>
 </pre>
 		
-		<pre class="file" id="file3" style="display: none">package userrepository
+		<pre class="file" id="file4" style="display: none">package userrepository
 
 import (
         "log"
@@ -220,7 +237,8 @@ func (r UserRepository) FindUserByID(id int64) (models.UserModels, error) <span 
                 SELECT 
                         id, username, email, password, status, created_at, updated_at
                 FROM 
-                        users WHERE id = ? AND status = 'active'`
+                        users 
+                WHERE id = ? AND status = 'active'`
 
         query = helpers.ReplaceSQL(query, "?")
 
@@ -252,10 +270,18 @@ func (r UserRepository) Register(req models.UserModels) (int64, error) <span cla
 
 func (r UserRepository) DeleteUser(userID int64) (int64, error) <span class="cov8" title="1">{
         var updatedID int64
-        query := `UPDATE users SET status = 'inactive' WHERE id =? RETURNING id`
+        query := `
+                UPDATE 
+                        users 
+                SET 
+                        status = 'inactive' 
+                WHERE 
+                        id = ?
+                RETURNING id
+        `
         query = helpers.ReplaceSQL(query, "?")
         err := r.repo.DB.QueryRow(query, userID).Scan(&amp;updatedID)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 log.Println("Error querying register: ", err)
                 return userID, err
         }</span>
@@ -264,7 +290,7 @@ func (r UserRepository) DeleteUser(userID int64) (int64, error) <span class="cov
 }
 </pre>
 		
-		<pre class="file" id="file4" style="display: none">package service
+		<pre class="file" id="file5" style="display: none">package service
 
 import (
         "myapp/helpers/utils"
@@ -287,7 +313,7 @@ func NewService(
 }</span>
 </pre>
 		
-		<pre class="file" id="file5" style="display: none">package userservice
+		<pre class="file" id="file6" style="display: none">package userservice
 
 import (
         "errors"
@@ -318,7 +344,7 @@ func (s UserService) FindUserByID(req models.RequestID) (models.UserModels, erro
 func (s UserService) Register(req models.UserRegisterRequest) (int64, error) <span class="cov8" title="1">{
 
         hashedPassword, err := s.service.Utils.GenerateHash(req.Password)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 msg := "failed to generate hash"
                 return 0, errors.New(msg)
         }</span>
@@ -349,7 +375,7 @@ func (s UserService) DeleteUser(req models.RequestID) (int64, error) <span class
         }</span>
 
         <span class="cov8" title="1">result, err := s.service.UserRepo.DeleteUser(user.ID)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 msg := "failed to delete user"
                 return 0, errors.New(msg)
         }</span>

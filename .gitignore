@@ -3,6 +3,8 @@
 # Coverage files
 coverage.html
 coverage.out
+coverage_integrations.html
+coverage_integrations.out
 coverage_service.html
 coverage_service.out
 coverage_repository.html

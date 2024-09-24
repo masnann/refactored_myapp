@@ -7,10 +7,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 // Test_FindByID tests the FindUserByID function of the UserService.
-func Test_FindByID(t *testing.T) {
+func TestService_FindByID(t *testing.T) {
 	// Setup a mock test environment using setup.SetupTestCaseService.
 	ts := setup.SetupTestCaseService(t)
 
@@ -65,7 +66,7 @@ func Test_FindByID(t *testing.T) {
 }
 
 // TestUnit_DeleteUser tests the DeleteUser function of the UserService.
-func TestUnit_DeleteUser(t *testing.T) {
+func TestService_DeleteUser(t *testing.T) {
 	req := models.RequestID{ID: 1}
 	expectedUser := models.UserModels{
 		ID:       1,
@@ -129,6 +130,67 @@ func TestUnit_DeleteUser(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, expectedResult, result)
+		assert.Nil(t, err)
+	})
+}
+
+func TestService_Register(t *testing.T) {
+
+	req := models.UserRegisterRequest{
+		Username: "Test User",
+		Email:    "testuser@example.com",
+		Password: "testpassword",
+	}
+
+	expectedUser := models.UserModels{
+		ID:       1,
+		Username: "Test User",
+		Email:    "testuser@example.com",
+	}
+
+	t.Run("Failure Case - Error Hash Password", func(t *testing.T) {
+		ts := setup.SetupTestCaseService(t)
+		expectedErr := errors.New("failed to generate hash")
+
+		ts.Utils.On("GenerateHash", req.Password).Return("", expectedErr)
+
+		_, err := ts.UserService.Register(req)
+
+		ts.Utils.AssertExpectations(t)
+
+		assert.Error(t, err)
+		assert.Equal(t, expectedErr, err)
+	})
+
+	t.Run("Failure Case - Failed To Register User", func(t *testing.T) {
+		ts := setup.SetupTestCaseService(t)
+		expectedErr := errors.New("failed to register user")
+
+		ts.Utils.On("GenerateHash", req.Password).Return("hashed_password", nil)
+		ts.UserRepo.On("Register", mock.Anything).Return(int64(0), expectedErr)
+
+		result, err := ts.UserService.Register(req)
+
+		ts.Utils.AssertExpectations(t)
+		ts.UserRepo.AssertExpectations(t)
+
+		assert.Error(t, err)
+		assert.Equal(t, expectedErr, err)
+		assert.Equal(t, int64(0), result)
+	})
+
+	t.Run("Success Case - Successfully Register User", func(t *testing.T) {
+		ts := setup.SetupTestCaseService(t)
+		ts.Utils.On("GenerateHash", req.Password).Return("hashed_password", nil)
+		ts.UserRepo.On("Register", mock.Anything).Return(expectedUser.ID, nil)
+
+		result, err := ts.UserService.Register(req)
+
+		ts.Utils.AssertExpectations(t)
+		ts.UserRepo.AssertExpectations(t)
+
+		assert.NoError(t, err)
+		assert.Equal(t, expectedUser.ID, result)
 		assert.Nil(t, err)
 	})
 }

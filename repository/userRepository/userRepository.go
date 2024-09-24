@@ -23,7 +23,8 @@ func (r UserRepository) FindUserByID(id int64) (models.UserModels, error) {
 		SELECT 
 			id, username, email, password, status, created_at, updated_at
 		FROM 
-			users WHERE id = ? AND status = 'active'`
+			users 
+		WHERE id = ? AND status = 'active'`
 
 	query = helpers.ReplaceSQL(query, "?")
 
@@ -55,7 +56,15 @@ func (r UserRepository) Register(req models.UserModels) (int64, error) {
 
 func (r UserRepository) DeleteUser(userID int64) (int64, error) {
 	var updatedID int64
-	query := `UPDATE users SET status = 'inactive' WHERE id =? RETURNING id`
+	query := `
+		UPDATE 
+			users 
+		SET 
+			status = 'inactive' 
+		WHERE 
+			id = ?
+		RETURNING id
+	`
 	query = helpers.ReplaceSQL(query, "?")
 	err := r.repo.DB.QueryRow(query, userID).Scan(&updatedID)
 	if err != nil {
