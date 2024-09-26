@@ -207,3 +207,55 @@ func TestRepository_Register(t *testing.T) {
 		assert.NoError(t, ts.Mock.ExpectationsWereMet())
 	})
 }
+
+func TestRepository_FindUserByEmail(t *testing.T) {
+	ts := setup.SetupTestCaseRepository(t)
+
+	req := "test@example.com"
+
+	// Define the expected user for successful test case.
+	expectedUser := models.UserModels{
+		ID:        1,
+		Username:  "testuser",
+		Email:     "test@example.com",
+		Password:  "hashedpassword",
+		Status:    "active",
+		CreatedAt: "",
+		UpdatedAt: "",
+	}
+
+	query := regexp.QuoteMeta(`
+            SELECT id, username, email, password, status, created_at, updated_at
+            FROM users WHERE email = ?
+        `)
+	query = helpers.ReplaceSQL(query, "?")
+	t.Run("Success Case - User Found", func(t *testing.T) {
+		// Mock the expected query with arguments and corresponding rows.
+		rows := sqlmock.NewRows([]string{"id", "username", "email", "password", "status", "created_at", "updated_at"}).
+			AddRow(expectedUser.ID, expectedUser.Username, expectedUser.Email, expectedUser.Password, expectedUser.Status, expectedUser.CreatedAt, expectedUser.UpdatedAt)
+		ts.Mock.ExpectQuery(query).WithArgs(expectedUser.Email).WillReturnRows(rows)
+
+		// Call the FindUserByID function and assert the results.
+		user, err := ts.UserRepo.FindUserByEmail(expectedUser.Email)
+		assert.NoError(t, err, "Error finding user")
+		assert.Equal(t, expectedUser, user, "Retrieved user does not match expected user")
+
+		// Verify that all mock expectations were met.
+		assert.NoError(t, ts.Mock.ExpectationsWereMet(), "Mock expectations not met")
+	})
+
+	t.Run("Failure Case _ User Not Found", func(t *testing.T) {
+
+		ts.Mock.ExpectQuery(query).WithArgs(req).WillReturnError(sql.ErrNoRows)
+
+		// Call the FindUserByID function and assert the results.
+		user, err := ts.UserRepo.FindUserByEmail(req)
+		assert.Error(t, err, "Expected error finding user")
+		assert.Equal(t, models.UserModels{}, user, "Retrieved user should be empty")
+		assert.Equal(t, sql.ErrNoRows, err, "Expected specific error (sql.ErrNoRows)")
+
+		// Verify that all mock expectations were met.
+		assert.NoError(t, ts.Mock.ExpectationsWereMet(), "Mock expectations not met")
+	})
+
+}

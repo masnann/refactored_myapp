@@ -74,3 +74,24 @@ func (r UserRepository) DeleteUser(userID int64) (int64, error) {
 
 	return userID, nil
 }
+
+func (r UserRepository) FindUserByEmail(email string) (models.UserModels, error) {
+	var user models.UserModels
+	query := `
+        SELECT 
+            id, username, email, password, status, created_at, updated_at
+        FROM 
+            users 
+        WHERE email = ?`
+
+	query = helpers.ReplaceSQL(query, "?")
+
+	row := r.repo.DB.QueryRow(query, email)
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Status, &user.CreatedAt, &user.UpdatedAt)
+	if err != nil {
+		log.Println("Error query FindUserByEmail: ", err)
+		return user, err
+	}
+	return user, nil
+
+}

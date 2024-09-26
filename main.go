@@ -44,9 +44,12 @@ func main() {
 		if !ok {
 			report = echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 		}
+
 		result := helpers.ResponseJSON(false, strconv.Itoa(report.Code), err.Error(), nil)
 		c.Logger().Error(report)
-		c.JSON(report.Code, result)
+		if err := c.JSON(report.Code, result); err != nil {
+			c.Logger().Error("Failed to send JSON response: ", err)
+		}
 	}
 
 	e.GET("/", func(c echo.Context) error {

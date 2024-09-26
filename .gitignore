@@ -1,8 +1,8 @@
 *.env
 
 # Coverage files
-coverage.html
-coverage.out
+coverage_all.html
+coverage_all.out
 coverage_integrations.html
 coverage_integrations.out
 coverage_service.html

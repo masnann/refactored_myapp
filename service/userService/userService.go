@@ -27,6 +27,11 @@ func (s UserService) FindUserByID(req models.RequestID) (models.UserModels, erro
 }
 
 func (s UserService) Register(req models.UserRegisterRequest) (int64, error) {
+	_, err := s.service.UserRepo.FindUserByEmail(req.Email)
+	if err == nil {
+		msg := "email already registered"
+		return 0, errors.New(msg)
+	}
 
 	hashedPassword, err := s.service.Utils.GenerateHash(req.Password)
 	if err != nil {
@@ -65,5 +70,15 @@ func (s UserService) DeleteUser(req models.RequestID) (int64, error) {
 		return 0, errors.New(msg)
 	}
 
+	return result, nil
+}
+
+// FindUserByEmail implements service.UserServiceInterface.
+func (s UserService) FindUserByEmail(req models.UserFindUserByEmailRequest) (models.UserModels, error) {
+	result, err := s.service.UserRepo.FindUserByEmail(req.Email)
+	if err != nil {
+		msg := "user not found"
+		return result, errors.New(msg)
+	}
 	return result, nil
 }

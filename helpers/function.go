@@ -10,6 +10,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"log"
 	"myapp/models"
 	"regexp"
 	"strconv"
@@ -59,10 +60,13 @@ var validate *validator.Validate
 
 func init() {
 	validate = validator.New()
-	validate.RegisterValidation("noSpace", func(fl validator.FieldLevel) bool {
+	err := validate.RegisterValidation("noSpace", func(fl validator.FieldLevel) bool {
 		password := fl.Field().String()
 		return !regexp.MustCompile(`\s`).MatchString(password)
 	})
+	if err != nil {
+		log.Fatalf("error registering validation: %v", err)
+	}
 }
 
 func ValidateStruct(ctx echo.Context, s interface{}) error {

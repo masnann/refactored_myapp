@@ -59,3 +59,7 @@ type UserValidateOtpRequest struct {
 	UserID  int64  `json:"userID"`
 	OtpHash string `json:"otpHash"`
 }
+
+type UserFindUserByEmailRequest struct {
+	Email string `json:"email"`
+}

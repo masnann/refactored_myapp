@@ -41,6 +41,34 @@ func (_m *UserRepositoryInterface) DeleteUser(userID int64) (int64, error) {
 	return r0, r1
 }
 
+// FindUserByEmail provides a mock function with given fields: email
+func (_m *UserRepositoryInterface) FindUserByEmail(email string) (models.UserModels, error) {
+	ret := _m.Called(email)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindUserByEmail")
+	}
+
+	var r0 models.UserModels
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (models.UserModels, error)); ok {
+		return rf(email)
+	}
+	if rf, ok := ret.Get(0).(func(string) models.UserModels); ok {
+		r0 = rf(email)
+	} else {
+		r0 = ret.Get(0).(models.UserModels)
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(email)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // FindUserByID provides a mock function with given fields: id
 func (_m *UserRepositoryInterface) FindUserByID(id int64) (models.UserModels, error) {
 	ret := _m.Called(id)
