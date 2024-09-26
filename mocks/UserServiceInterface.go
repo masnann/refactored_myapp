@@ -41,6 +41,34 @@ func (_m *UserServiceInterface) DeleteUser(req models.RequestID) (int64, error) 
 	return r0, r1
 }
 
+// FindUserByEmail provides a mock function with given fields: req
+func (_m *UserServiceInterface) FindUserByEmail(req models.UserFindUserByEmailRequest) (models.UserModels, error) {
+	ret := _m.Called(req)
+
+	if len(ret) == 0 {
+		panic("no return value specified for FindUserByEmail")
+	}
+
+	var r0 models.UserModels
+	var r1 error
+	if rf, ok := ret.Get(0).(func(models.UserFindUserByEmailRequest) (models.UserModels, error)); ok {
+		return rf(req)
+	}
+	if rf, ok := ret.Get(0).(func(models.UserFindUserByEmailRequest) models.UserModels); ok {
+		r0 = rf(req)
+	} else {
+		r0 = ret.Get(0).(models.UserModels)
+	}
+
+	if rf, ok := ret.Get(1).(func(models.UserFindUserByEmailRequest) error); ok {
+		r1 = rf(req)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // FindUserByID provides a mock function with given fields: req
 func (_m *UserServiceInterface) FindUserByID(req models.RequestID) (models.UserModels, error) {
 	ret := _m.Called(req)
@@ -61,6 +89,34 @@ func (_m *UserServiceInterface) FindUserByID(req models.RequestID) (models.UserM
 	}
 
 	if rf, ok := ret.Get(1).(func(models.RequestID) error); ok {
+		r1 = rf(req)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// Login provides a mock function with given fields: req
+func (_m *UserServiceInterface) Login(req models.UserLoginRequest) (models.UserLoginResponse, error) {
+	ret := _m.Called(req)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Login")
+	}
+
+	var r0 models.UserLoginResponse
+	var r1 error
+	if rf, ok := ret.Get(0).(func(models.UserLoginRequest) (models.UserLoginResponse, error)); ok {
+		return rf(req)
+	}
+	if rf, ok := ret.Get(0).(func(models.UserLoginRequest) models.UserLoginResponse); ok {
+		r0 = rf(req)
+	} else {
+		r0 = ret.Get(0).(models.UserLoginResponse)
+	}
+
+	if rf, ok := ret.Get(1).(func(models.UserLoginRequest) error); ok {
 		r1 = rf(req)
 	} else {
 		r1 = ret.Error(1)

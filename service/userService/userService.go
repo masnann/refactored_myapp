@@ -2,6 +2,7 @@ package userservice
 
 import (
 	"errors"
+	"log"
 	"myapp/helpers"
 	"myapp/models"
 	"myapp/service"
@@ -54,6 +55,17 @@ func (s UserService) Register(req models.UserRegisterRequest) (int64, error) {
 		return 0, errors.New(msg)
 	}
 
+	newRole := models.AssignRoleToUserRequest{
+		UserID: result,
+		RoleID: 2,
+	}
+
+	err = s.service.RolePermissionRepo.AssignRoleToUserRequest(newRole)
+	if err != nil {
+		msg := "failed to assign role"
+		return 0, errors.New(msg)
+	}
+
 	return result, nil
 }
 
@@ -81,4 +93,54 @@ func (s UserService) FindUserByEmail(req models.UserFindUserByEmailRequest) (mod
 		return result, errors.New(msg)
 	}
 	return result, nil
+}
+
+func (s UserService) Login(req models.UserLoginRequest) (models.UserLoginResponse, error) {
+	var result models.UserLoginResponse
+
+	user, err := s.service.UserRepo.FindUserByEmail(req.Email)
+	if err != nil {
+		log.Println("Error finding user by email: ", err)
+		return result, errors.New("user not found")
+	}
+
+	isValidPassword, err := s.service.Utils.CompareHash(user.Password, req.Password)
+	if !isValidPassword || err != nil {
+		log.Println("Error comparing password: ", err)
+		return result, errors.New("invalid password")
+	}
+
+	role, err := s.service.RolePermissionRepo.FindUserRole(user.ID)
+	if err != nil {
+		log.Println("Error finding user role: ", err)
+		return result, errors.New("failed to find user role")
+	}
+
+	accessToken, err := s.service.Utils.GenerateJWT(user.ID, user.Email, role.RoleName)
+	if err != nil {
+		log.Println("Error generating JWT: ", err)
+		return result, errors.New("failed to generate access token")
+	}
+
+	refreshToken, err := s.service.Utils.GenerateRefreshToken(user.ID)
+	if err != nil {
+		log.Println("Error generating refresh token: ", err)
+		return result, errors.New("failed to generate refresh token")
+	}
+
+	// permissions, err := s.service.RolePermissionRepo.FindPermissionsForUser(user.ID)
+	// if err != nil {
+	// 	log.Println("Error finding user permissions: ", err)
+	// 	return result, errors.New("failed to find user permissions")
+	// }
+
+	response := models.UserLoginResponse{
+		UserID:       user.ID,
+		RoleName:     role.RoleName,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		//Permission:   permissions,
+	}
+
+	return response, nil
 }

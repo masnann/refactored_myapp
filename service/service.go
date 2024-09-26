@@ -6,16 +6,19 @@ import (
 )
 
 type Service struct {
-	UserRepo repository.UserRepositoryInterface
-	Utils    utils.UtilsInterface
+	Utils              utils.UtilsInterface
+	UserRepo           repository.UserRepositoryInterface
+	RolePermissionRepo repository.RolePermissionRepositoryInterface
 }
 
 func NewService(
-	userRepo repository.UserRepositoryInterface,
 	utils utils.UtilsInterface,
+	userRepo repository.UserRepositoryInterface,
+	rolePermissionRepo repository.RolePermissionRepositoryInterface,
 ) Service {
 	return Service{
-		UserRepo: userRepo,
-		Utils:    utils,
+		Utils:              utils,
+		UserRepo:           userRepo,
+		RolePermissionRepo: rolePermissionRepo,
 	}
 }

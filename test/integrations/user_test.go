@@ -26,7 +26,6 @@ func insertTestUser(db *sql.DB, username, email, password string) (int64, error)
 
 func TestFindUserByID(t *testing.T) {
 	db := setup.InitializeTestDB(t)
-	defer db.Close()
 
 	e := setup.SetupEcho(db)
 
@@ -38,12 +37,13 @@ func TestFindUserByID(t *testing.T) {
 
 	// Define models response
 	var response models.Response
-	path := "/api/v1/public/user/findbyid"
+	path := "/api/v1/private/findbyid"
 	method := http.MethodPost
+	token := setup.GenerateSuperAdminToken()
 
 	// Test case for validation error
 	t.Run("Failure Case - Error Validation", func(t *testing.T) {
-		rec := setup.SendAPIRequest(t, e, method, path, nil)
+		rec := setup.SendAPIRequest(t, e, method, path, nil, token)
 
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
 
@@ -60,7 +60,7 @@ func TestFindUserByID(t *testing.T) {
 	t.Run("Failure Case - User Not Found", func(t *testing.T) {
 		nonExistingUserID := userID + 9999
 		reqBodyNegative := models.RequestID{ID: nonExistingUserID}
-		rec := setup.SendAPIRequest(t, e, method, path, reqBodyNegative)
+		rec := setup.SendAPIRequest(t, e, method, path, reqBodyNegative, token)
 
 		assert.Equal(t, http.StatusInternalServerError, rec.Code)
 
@@ -76,7 +76,7 @@ func TestFindUserByID(t *testing.T) {
 	// Test case for user found
 	t.Run("Success Case - User Found", func(t *testing.T) {
 		reqBody := models.RequestID{ID: userID}
-		rec := setup.SendAPIRequest(t, e, method, path, reqBody)
+		rec := setup.SendAPIRequest(t, e, method, path, reqBody, token)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 
@@ -94,12 +94,11 @@ func TestFindUserByID(t *testing.T) {
 func TestUserRegister(t *testing.T) {
 	// Initialize the test database
 	db := setup.InitializeTestDB(t)
-	defer db.Close()
 
 	// Setup Echo context and routes
 	e := setup.SetupEcho(db)
 	// Prepare the request payload
-	userRegisterRequest := models.UserRegisterRequest{
+	req := models.UserRegisterRequest{
 		Username: "testuser",
 		Email:    "testuser@example.com",
 		Password: "password123",
@@ -112,7 +111,7 @@ func TestUserRegister(t *testing.T) {
 	t.Run("Success Case - Register", func(t *testing.T) {
 
 		// Create HTTP POST request to the user register endpoint
-		rec := setup.SendAPIRequest(t, e, method, path, userRegisterRequest)
+		rec := setup.SendAPIRequest(t, e, method, path, req, "")
 
 		// Check the response status code
 		assert.Equal(t, http.StatusCreated, rec.Code)
@@ -130,11 +129,11 @@ func TestUserRegister(t *testing.T) {
 	})
 
 	t.Run("Failure Case - Error Validation", func(t *testing.T) {
-		userRegisterRequest := models.UserRegisterRequest{
+		req := models.UserRegisterRequest{
 			Password: "password123",
 		}
 		// Create HTTP POST request to the user register endpoint
-		rec := setup.SendAPIRequest(t, e, method, path, userRegisterRequest)
+		rec := setup.SendAPIRequest(t, e, method, path, req, "")
 
 		// Check the response status code for validation error
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
@@ -155,8 +154,7 @@ func TestUserRegister(t *testing.T) {
 		db.Close()
 
 		// Create HTTP POST request to the user register endpoint
-		rec := setup.SendAPIRequest(t, e, method, path, userRegisterRequest)
-
+		rec := setup.SendAPIRequest(t, e, method, path, req, "")
 		// Check the response status code (expecting 503 Service Unavailable)
 		assert.Equal(t, http.StatusInternalServerError, rec.Code)
 
@@ -176,7 +174,6 @@ func TestUserRegister(t *testing.T) {
 
 func TestDeleteUser(t *testing.T) {
 	db := setup.InitializeTestDB(t)
-	defer db.Close()
 
 	e := setup.SetupEcho(db)
 
@@ -192,7 +189,7 @@ func TestDeleteUser(t *testing.T) {
 	t.Run("Success Case - User Deleted", func(t *testing.T) {
 
 		req := models.RequestID{ID: userID}
-		rec := setup.SendAPIRequest(t, e, method, path, req)
+		rec := setup.SendAPIRequest(t, e, method, path, req, "")
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 
@@ -205,7 +202,7 @@ func TestDeleteUser(t *testing.T) {
 
 	t.Run("Failure Case - Error Validation", func(t *testing.T) {
 		req := models.RequestID{}
-		rec := setup.SendAPIRequest(t, e, method, path, req)
+		rec := setup.SendAPIRequest(t, e, method, path, req, "")
 
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
 
@@ -219,7 +216,7 @@ func TestDeleteUser(t *testing.T) {
 	t.Run("Failure Case - User Not Found", func(t *testing.T) {
 		nonExistingUserID := userID + 9999
 		req := models.RequestID{ID: nonExistingUserID}
-		rec := setup.SendAPIRequest(t, e, method, path, req)
+		rec := setup.SendAPIRequest(t, e, method, path, req, "")
 
 		assert.Equal(t, http.StatusInternalServerError, rec.Code)
 

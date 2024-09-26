@@ -17,3 +17,6 @@ test-all:
 
 run:
 	go run main.go
+
+migrations:
+	goose -dir db/migrations postgres "postgres://postgres:mkpmobile2024@localhost:5432/goauth?sslmode=disable" up

@@ -15,31 +15,37 @@ var testDB *sql.DB
 
 // OpenConnectionDBTest initializes the test database connection, runs migrations, and ensures that the schema is set up.
 func OpenConnectionDBTest() error {
-	var err error
+    var err error
 
-	// Open a connection to the test database
-	testDB, err = sql.Open("postgres", config.TestDBURL)
-	if err != nil {
-		return fmt.Errorf("failed to connect to test database: %w", err)
-	}
+    // Open a connection for testing (testDB)
+    testDB, err = sql.Open("postgres", config.TestDBURL)
+    if err != nil {
+        return fmt.Errorf("failed to connect to test database: %w", err)
+    }
 
-	// Ping the database to ensure the connection is established
-	if err := testDB.Ping(); err != nil {
-		return fmt.Errorf("failed to ping test database: %w", err)
-	}
+    // Open a separate connection for cleanup (cleanupDB)
+    cleanupDB, err := sql.Open("postgres", config.TestDBURL)
+    if err != nil {
+        return fmt.Errorf("failed to connect to cleanup database: %w", err)
+    }
+    defer cleanupDB.Close() // Close cleanupDB after use
 
-	if err := cleanupDatabase(testDB); err != nil {
-		return fmt.Errorf("failed to clean up test database: %w", err)
-	}
+    // Ping the testing database
+    if err := testDB.Ping(); err != nil {
+        return fmt.Errorf("failed to ping test database: %w", err)
+    }
 
-	// Run database migrations to ensure schema is up to date
-	if err := runMigrations(testDB); err != nil {
-		return fmt.Errorf("failed to run migrations: %w", err)
-	}
+    if err := cleanupDatabase(cleanupDB); err != nil {
+        return fmt.Errorf("failed to clean up test database: %w", err)
+    }
 
-	return nil
+    // Run migrations on testDB
+    if err := runMigrations(testDB); err != nil {
+        return fmt.Errorf("failed to run migrations: %w", err)
+    }
+
+    return nil
 }
-
 // runMigrations applies all pending migrations to the database.
 func runMigrations(db *sql.DB) error {
 	migrationDir := filepath.Join("..", "..", "db", "migrations")
@@ -56,14 +62,35 @@ func runMigrations(db *sql.DB) error {
 
 // delete table
 func cleanupDatabase(db *sql.DB) error {
-	_, err := db.Exec("DROP TABLE IF EXISTS users;")
+	// Query to get all table
+	query := `
+		SELECT table_name
+		FROM information_schema.tables
+		WHERE table_schema = 'public'
+		AND table_type = 'BASE TABLE';`
+
+	rows, err := db.Query(query)
 	if err != nil {
-		return fmt.Errorf("failed to clean up table users: %w", err)
+		return fmt.Errorf("failed to fetch table names: %w", err)
+	}
+	defer rows.Close()
+
+	var tableName string
+	var tables []string
+
+	for rows.Next() {
+		if err := rows.Scan(&tableName); err != nil {
+			return fmt.Errorf("failed to scan table name: %w", err)
+		}
+		tables = append(tables, tableName)
 	}
 
-	_, err = db.Exec("DROP TABLE IF EXISTS goose_db_version;")
-	if err != nil {
-		return fmt.Errorf("failed to clean up table goose_db_version: %w", err)
+	// Drop all table
+	for _, table := range tables {
+		_, err := db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS %s CASCADE;", table))
+		if err != nil {
+			return fmt.Errorf("failed to drop table %s: %w", table, err)
+		}
 	}
 
 	return nil

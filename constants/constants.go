@@ -40,4 +40,11 @@ const (
 	FALSE_VALUE           = "false"
 	EMPTY_VALUE           = ""
 	USER                  = "user"
+
+	// Role
+	SuperAdminRole    = "Super Admin"
+	CustomerRole      = "Customer"
+	MerchantRole      = "Merchant"
+	MerchantAdminRole = "Merchant Admin"
+	AccessDenied      = "Access denied. You don't have permission"
 )
