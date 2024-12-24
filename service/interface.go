@@ -8,4 +8,5 @@ type UserServiceInterface interface {
 	DeleteUser(req models.RequestID) (int64, error)
 	FindUserByEmail(req models.UserFindUserByEmailRequest) (models.UserModels, error)
 	Login(req models.UserLoginRequest) (models.UserLoginResponse, error)
+	FindProfile(userID int64) (models.UserModels, error)
 }

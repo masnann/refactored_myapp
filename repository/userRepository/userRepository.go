@@ -1,6 +1,7 @@
 package userrepository
 
 import (
+	"fmt"
 	"log"
 	"myapp/helpers"
 	"myapp/models"
@@ -17,19 +18,37 @@ func NewUserRepository(repo repository.Repository) UserRepository {
 	}
 }
 
+const (
+	UserTable         = "users"
+	UserInsertColumns = "username, email, password, status, address, created_at, updated_at"
+	UserSelectColumns = "id, username, email, password, status, created_at, updated_at, coalesce(address,'')"
+)
+
+// UserScanArgs returns a slice of pointers to the fields of the UserModels struct
+func userScanArgs(user *models.UserModels) []interface{} {
+	return []interface{}{
+		&user.ID,
+		&user.Username,
+		&user.Email,
+		&user.Password,
+		&user.Status,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.Address,
+	}
+}
+
 func (r UserRepository) FindUserByID(id int64) (models.UserModels, error) {
 	var user models.UserModels
-	query := `
-		SELECT 
-			id, username, email, password, status, created_at, updated_at
-		FROM 
-			users 
-		WHERE id = ? AND status = 'active'`
+	query := fmt.Sprintf(`
+		SELECT %s
+		FROM %s
+		WHERE id = ? AND status = 'active'`, UserSelectColumns, UserTable)
 
 	query = helpers.ReplaceSQL(query, "?")
 
 	row := r.repo.DB.QueryRow(query, id)
-	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Status, &user.CreatedAt, &user.UpdatedAt)
+	err := row.Scan(userScanArgs(&user)...)
 	if err != nil {
 		log.Println("Error query FindUserByID: ", err)
 		return user, err
@@ -39,13 +58,13 @@ func (r UserRepository) FindUserByID(id int64) (models.UserModels, error) {
 
 func (r UserRepository) Register(req models.UserModels) (int64, error) {
 	var ID int64
-	query := `
-		INSERT INTO users (username, email, password, status, created_at, updated_at) 
-		VALUES (?, ?, ?, ?, ?, ?)
-		RETURNING id`
+	query := fmt.Sprintf(`
+		INSERT INTO %s (%s) 
+		VALUES (?, ?, ?, ?, ?, ?, ?)
+		RETURNING id`, UserTable, UserInsertColumns)
 
 	query = helpers.ReplaceSQL(query, "?")
-	err := r.repo.DB.QueryRow(query, req.Username, req.Email, req.Password, req.Status, req.CreatedAt, req.UpdatedAt).Scan(&ID)
+	err := r.repo.DB.QueryRow(query, req.Username, req.Email, req.Password, req.Status, req.Address, req.CreatedAt, req.UpdatedAt).Scan(&ID)
 	if err != nil {
 		log.Println("Error querying register: ", err)
 		return ID, err
@@ -56,19 +75,16 @@ func (r UserRepository) Register(req models.UserModels) (int64, error) {
 
 func (r UserRepository) DeleteUser(userID int64) (int64, error) {
 	var updatedID int64
-	query := `
-		UPDATE 
-			users 
-		SET 
-			status = 'inactive' 
-		WHERE 
-			id = ?
-		RETURNING id
-	`
+	query := fmt.Sprintf(`
+		UPDATE %s 
+		SET status = 'inactive' 
+		WHERE id = ?
+		RETURNING id`, UserTable)
+
 	query = helpers.ReplaceSQL(query, "?")
 	err := r.repo.DB.QueryRow(query, userID).Scan(&updatedID)
 	if err != nil {
-		log.Println("Error querying register: ", err)
+		log.Println("Error querying delete user: ", err)
 		return userID, err
 	}
 
@@ -77,21 +93,18 @@ func (r UserRepository) DeleteUser(userID int64) (int64, error) {
 
 func (r UserRepository) FindUserByEmail(email string) (models.UserModels, error) {
 	var user models.UserModels
-	query := `
-        SELECT 
-            id, username, email, password, status, created_at, updated_at
-        FROM 
-            users 
-        WHERE email = ?`
+	query := fmt.Sprintf(`
+		SELECT %s 
+		FROM %s 
+		WHERE email = ?`, UserSelectColumns, UserTable)
 
 	query = helpers.ReplaceSQL(query, "?")
 
 	row := r.repo.DB.QueryRow(query, email)
-	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Status, &user.CreatedAt, &user.UpdatedAt)
+	err := row.Scan(userScanArgs(&user)...)
 	if err != nil {
-		log.Println("Error query FindUserByEmail: ", err)
+		log.Println("Error querying FindUserByEmail: ", err)
 		return user, err
 	}
 	return user, nil
-
 }

@@ -12,11 +12,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func insertTestUser(db *sql.DB, username, email, password string) (int64, error) {
+func insertTestUser(db *sql.DB, username, email, password, address string) (int64, error) {
 	var id int64
 	err := db.QueryRow(
-		"INSERT INTO users (username, email, password, status, created_at, updated_at) VALUES ($1, $2, $3, 'active', '', '') RETURNING id",
-		username, email, password,
+		"INSERT INTO users (username, email, password, status, address, created_at, updated_at) VALUES ($1, $2, $3, 'active', $4, '', '') RETURNING id",
+		username, email, password, address,
 	).Scan(&id)
 	if err != nil {
 		return 0, err
@@ -30,7 +30,7 @@ func TestFindUserByID(t *testing.T) {
 	e := setup.SetupEcho(db)
 
 	// Prepare a user for testing
-	userID, err := insertTestUser(db, "testuser", "testuser@example.com", "password")
+	userID, err := insertTestUser(db, "testuser", "testuser@example.com", "password", "address")
 	if err != nil {
 		t.Fatalf("Failed to insert test user: %v", err)
 	}
@@ -39,7 +39,7 @@ func TestFindUserByID(t *testing.T) {
 	var response models.Response
 	path := "/api/v1/private/findbyid"
 	method := http.MethodPost
-	token := setup.GenerateSuperAdminToken()
+	token := setup.GenerateToken(1, "customer@example.com", "Customer")
 
 	// Test case for validation error
 	t.Run("Failure Case - Error Validation", func(t *testing.T) {
@@ -181,7 +181,7 @@ func TestDeleteUser(t *testing.T) {
 	path := "/api/v1/public/user/delete"
 	method := http.MethodPost
 
-	userID, err := insertTestUser(db, "testuser", "testuser@example.com", "password")
+	userID, err := insertTestUser(db, "testuser", "testuser@example.com", "password", "address")
 	if err != nil {
 		t.Fatalf("Failed to insert test user: %v", err)
 	}

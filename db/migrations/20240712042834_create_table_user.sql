@@ -6,6 +6,7 @@ CREATE TABLE users (
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(100) NOT NULL,
     status VARCHAR(50) NOT NULL,
+    address VARCHAR(255) NOT NULL,
     created_at VARCHAR(255) NOT NULL,
     updated_at VARCHAR(255) NOT NULL
 )

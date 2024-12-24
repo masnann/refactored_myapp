@@ -1,7 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
-INSERT INTO users (username, email, password, status, created_at, updated_at) VALUES
-('Administrator', 'admin@example.com', 'WCKpRKzlsdtX4T3dKqa8b8D8lazoXew5W2DyFA74hRfzp9//vbKNsbDW7gjpwtU6', 'active', '2024-12-12 10.00', '');
+INSERT INTO users (username, email, password, status, address, created_at, updated_at) VALUES
+('Administrator', 'admin@example.com', 'WCKpRKzlsdtX4T3dKqa8b8D8lazoXew5W2DyFA74hRfzp9//vbKNsbDW7gjpwtU6', 'active', 'address', '2024-12-12 10.00', '');
 
 INSERT INTO roles (name, is_active, created_at, updated_at) VALUES
 ('SuperAdmin', true, '2024-12-12 10.00', ''),

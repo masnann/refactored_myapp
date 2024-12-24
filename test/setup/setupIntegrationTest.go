@@ -57,11 +57,11 @@ func SendAPIRequest(t *testing.T, e *echo.Echo, method, path string, payload int
 	return rec
 }
 
-func GenerateSuperAdminToken() string {
+func GenerateToken(userID int64, email, role string) string {
 	claims := jwt.MapClaims{
-		"userID": 1,
-		"email":  "superadmin@example.com",
-		"role":   "Customer",
+		"userID": userID,
+		"email":  email,
+		"role":   role,
 		"iat":    time.Now().Unix(),
 		"exp":    time.Now().Add(time.Hour * 72).Unix(),
 	}

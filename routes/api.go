@@ -17,6 +17,7 @@ func ApiRoutes(e *echo.Echo, handler handler.Handler) {
 	private.Use(middlewares.JWTMiddleware)
 
 	private.POST("/findbyid", middlewares.SuperAdminMiddleware(userHandler.FindUserByID))
+	private.POST("/profile", userHandler.FindProfile)
 
 	userGroup := public.Group("/user")
 	userGroup.POST("/register", userHandler.Register)

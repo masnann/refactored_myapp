@@ -44,7 +44,8 @@ func (s UserService) Register(req models.UserRegisterRequest) (int64, error) {
 		Username:  req.Username,
 		Email:     req.Email,
 		Password:  hashedPassword,
-		Status:    "",
+		Status:    "active",
+		Address:   req.Address,
 		CreatedAt: helpers.TimeStampNow(),
 		UpdatedAt: "",
 	}
@@ -143,4 +144,13 @@ func (s UserService) Login(req models.UserLoginRequest) (models.UserLoginRespons
 	}
 
 	return response, nil
+}
+
+func (s UserService) FindProfile(userID int64) (models.UserModels, error) {
+	result, err := s.service.UserRepo.FindUserByID(userID)
+	if err != nil {
+		msg := "user not found"
+		return result, errors.New(msg)
+	}
+	return result, nil
 }

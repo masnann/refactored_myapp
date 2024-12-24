@@ -97,3 +97,20 @@ func (h UserHandler) Login(ctx echo.Context) error {
 	result = helpers.ResponseJSON(true, constants.SUCCESS_CODE, constants.EMPTY_VALUE, response)
 	return ctx.JSON(http.StatusOK, result)
 }
+
+func (h UserHandler) FindProfile(ctx echo.Context) error {
+	var result models.Response
+
+	currentUser, err := helpers.GetCurrentUser(ctx)
+	if err != nil {
+		result := helpers.ResponseJSON(false, constants.FORBIDDEN_CODE, err.Error(), nil)
+		return ctx.JSON(http.StatusForbidden, result)
+	}
+	profile, err := h.handler.UserService.FindProfile(currentUser.ID)
+	if err != nil {
+		result = helpers.ResponseJSON(false, constants.INTERNAL_SERVER_ERROR, err.Error(), nil)
+		return ctx.JSON(http.StatusInternalServerError, result)
+	}
+	result = helpers.ResponseJSON(true, constants.SUCCESS_CODE, constants.EMPTY_VALUE, profile)
+	return ctx.JSON(http.StatusOK, result)
+}

@@ -8,4 +8,5 @@ type UserModels struct {
 	Status    string `json:"status"`
 	CreatedAt string `json:"createdAt"`
 	UpdatedAt string `json:"updatedAt"`
+	Address   string `json:"address"`
 }

@@ -6,6 +6,7 @@ type UserRegisterRequest struct {
 	Username  string `json:"username" validate:"required"`
 	Email     string `json:"email"`
 	Password  string `json:"password"`
+	Address   string `json:"address"`
 	Status    string `json:"status"`
 	CreatedAt string `json:"createdAt"`
 	UpdatedAt string `json:"updatedAt"`
