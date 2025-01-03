@@ -10,3 +10,9 @@ type UserServiceInterface interface {
 	Login(req models.UserLoginRequest) (models.UserLoginResponse, error)
 	FindProfile(userID int64) (models.UserModels, error)
 }
+
+type PartnerServiceInterface interface {
+	PartnerCreate(req models.PartnerCreateRequest) (int64, error)
+	PartnerAssignKey(req models.PartnerAssignKeyRequest) (int64, error)
+	PartnerFindByPartnerIDandSecretKey(partnerID int64, secretKey string) (models.PartnerModels, error)
+}

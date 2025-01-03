@@ -9,18 +9,19 @@ import (
 )
 
 var (
-	DBDriver  string
-	DBName    string
-	DBHost    string
-	DBPort    string
-	DBUser    string
-	DBPass    string
-	SSLMode   string
-	JWTSecret string
-	MONGOHost string
-	MONGOPort string
-	MONGODB   string
-	TestDBURL string
+	DBDriver      string
+	DBName        string
+	DBHost        string
+	DBPort        string
+	DBUser        string
+	DBPass        string
+	SSLMode       string
+	JWTSecret     string
+	MONGOHost     string
+	MONGOPort     string
+	MONGODB       string
+	TestDBURL     string
+	EncryptionKey string
 )
 
 func init() {
@@ -38,6 +39,7 @@ func init() {
 	MONGOPort = GetEnv("MONGO_PORT")
 	MONGODB = GetEnv("MONGO_DB")
 	TestDBURL = GetEnv("TEST_DB_URL")
+	EncryptionKey = GetEnv("ENCRYPTION_KEY")
 }
 
 func loadEnv() {

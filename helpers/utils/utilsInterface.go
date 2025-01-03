@@ -13,4 +13,6 @@ type UtilsInterface interface {
 	ValidateRefreshToken(tokenString string) (int64, error)
 	GenerateOTP(length int) (string, error)
 	CompareOTP(otpHash, otp string) (bool, error)
+	EncryptPlainText(plaintText string) (string, error)
+	DecryptEncryptedText(encryptedPlainText string) (string, error)
 }

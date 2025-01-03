@@ -53,7 +53,7 @@ func main() {
 	}
 
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, GO AUTH !")
+		return c.String(http.StatusOK, "Hello, MY APP !")
 	})
 	// Start server
 	port := fmt.Sprintf(":%s", config.GetEnv("APP_PORT", "8080"))

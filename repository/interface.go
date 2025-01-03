@@ -13,3 +13,9 @@ type RolePermissionRepositoryInterface interface {
 	AssignRoleToUserRequest(req models.AssignRoleToUserRequest) error
 	FindUserRole(userID int64) (models.FindUserRoleResponse, error)
 }
+
+type PartnerRepositoryInterface interface {
+	PartnerUpdate(req models.PartnerModels) (int64, error)
+	PartnerCreate(req models.PartnerModels) (int64, error)
+	PartnerFindByPartnerIDandSecretKey(partnerID int64, secretKey string) (models.PartnerModels, error)
+}

@@ -10,6 +10,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"myapp/models"
 	"regexp"
@@ -173,4 +174,76 @@ func parsePrivateKey(pemBytes []byte) (*rsa.PrivateKey, error) {
 	privatekeyrsa, _ := privatekey.(*rsa.PrivateKey)
 
 	return privatekeyrsa, err
+}
+
+// Fungsi untuk membaca private key dari file
+func LoadPrivateKey(filePath string) (*rsa.PrivateKey, error) {
+	privBytes, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read private key: %w", err)
+	}
+
+	block, _ := pem.Decode(privBytes)
+	if block == nil {
+		return nil, fmt.Errorf("failed to decode PEM block")
+	}
+
+	privKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse private key: %w", err)
+	}
+	return privKey, nil
+}
+
+// LoadPublicKey memuat public key dari file dengan format PEM
+func LoadPublicKey(publicKeyPath string) (*rsa.PublicKey, error) {
+	// Membaca file public key
+	pubKeyBytes, err := ioutil.ReadFile(publicKeyPath)
+	if err != nil {
+		log.Printf("Error reading public key file: %v", err)
+		return nil, err
+	}
+
+	// Mendekode file PEM
+	block, _ := pem.Decode(pubKeyBytes)
+	if block == nil {
+		return nil, errors.New("failed to parse PEM block containing the public key")
+	}
+
+	// Mem-parsing public key dalam format PKIX
+	pubKey, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+
+	// Mengonversi ke tipe rsa.PublicKey jika diperlukan
+	rsaPubKey, ok := pubKey.(*rsa.PublicKey)
+	if !ok {
+		return nil, errors.New("public key is not of type *rsa.PublicKey")
+	}
+
+	return rsaPubKey, nil
+}
+
+// Verify the signature using the public key
+func VerifySignature(data, signature string, publicKey *rsa.PublicKey) (bool, error) {
+	// Decode the base64 signature
+	signatureBytes, err := base64.StdEncoding.DecodeString(signature)
+	if err != nil {
+		return false, fmt.Errorf("failed to decode signature: %w", err)
+	}
+
+	// Hash the data using SHA256
+	hash := sha256.New()
+	hash.Write([]byte(data))
+	hashed := hash.Sum(nil)
+
+	// Verify the signature
+	err = rsa.VerifyPKCS1v15(publicKey, crypto.SHA256, hashed, signatureBytes)
+	if err != nil {
+		return false, fmt.Errorf("invalid signature: %w", err)
+	}
+
+	// If no error, signature is valid
+	return true, nil
 }

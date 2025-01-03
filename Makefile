@@ -20,3 +20,6 @@ run:
 
 migrations:
 	goose -dir db/migrations postgres "postgres://postgres:mkpmobile2024@localhost:5432/goauth?sslmode=disable" up
+
+migrations-create:
+	goose -dir db/migrations create $(NAME) sql
